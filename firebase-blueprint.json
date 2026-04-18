@@ -1,0 +1,168 @@
+{
+  "entities": {
+    "Store": {
+      "title": "Loja",
+      "description": "Cadastro de lojas/empresas.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "fantasyName": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "address": { "type": "string" },
+        "zipCode": { "type": "string" },
+        "neighborhood": { "type": "string" },
+        "logo": { "type": "string" },
+        "primaryColor": { "type": "string" },
+        "secondaryColor": { "type": "string" },
+        "observations": { "type": "string" }
+      },
+      "required": ["name", "fantasyName"]
+    },
+    "CostBase": {
+      "title": "Base de Custos",
+      "description": "Configurações de custos fixos e metas de lucro por loja.",
+      "type": "object",
+      "properties": {
+        "storeId": { "type": "string" },
+        "fixedCosts": { "type": "number", "description": "Custos fixos mensais" },
+        "productiveHours": { "type": "number", "description": "Horas produtivas mensais" },
+        "profitGoal": { "type": "number", "description": "Meta de lucro (%)" },
+        "hourlyRate": { "type": "number", "description": "Valor da hora trabalhada (calculado)" }
+      },
+      "required": ["storeId", "fixedCosts", "productiveHours", "profitGoal"]
+    },
+    "Material": {
+      "title": "Matéria-prima",
+      "description": "Cadastro de insumos e materiais por loja.",
+      "type": "object",
+      "properties": {
+        "storeId": { "type": "string" },
+        "name": { "type": "string" },
+        "unit": { "type": "string", "description": "Unidade de compra (ex: kg, m, un)" },
+        "purchasePrice": { "type": "number" },
+        "purchaseQuantity": { "type": "number" },
+        "unitCost": { "type": "number", "description": "Custo por unidade de uso" },
+        "isPackage": { "type": "boolean" },
+        "packageQuantity": { "type": "number" },
+        "supplierId": { "type": "string", "description": "ID do fornecedor associado" }
+      },
+      "required": ["storeId", "name", "unit", "purchasePrice", "purchaseQuantity"]
+    },
+    "Product": {
+      "title": "Produto",
+      "description": "Cadastro de produtos e sua composição por loja.",
+      "type": "object",
+      "properties": {
+        "storeId": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "materials": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "materialId": { "type": "string" },
+              "quantity": { "type": "number" }
+            }
+          }
+        },
+        "productionTime": { "type": "number", "description": "Tempo em minutos" },
+        "packagingCost": { "type": "number" },
+        "isPackage": { "type": "boolean", "description": "Indica se o produto é um pacote/kit" },
+        "packageQuantity": { "type": "number", "description": "Quantidade de itens no pacote" }
+      },
+      "required": ["storeId", "name", "category", "productionTime"]
+    },
+    "Quote": {
+      "title": "Orçamento",
+      "description": "Histórico de orçamentos gerados por loja.",
+      "type": "object",
+      "properties": {
+        "storeId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "expiryDate": { "type": "string", "format": "date-time" },
+        "clientId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientType": { "type": "string", "enum": ["PF", "PJ"] },
+        "cnpj": { "type": "string" },
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "quantity": { "type": "number" },
+        "channel": { "type": "string" },
+        "totalCost": { "type": "number" },
+        "unitPrice": { "type": "number" },
+        "margin": { "type": "number" },
+        "profit": { "type": "number" },
+        "platformFee": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pendente", "Aprovado", "Em produção", "Finalizado"] },
+        "followUpStatus": { "type": "string", "enum": ["Pendente", "Realizado", "Nenhum"] }
+      },
+      "required": ["storeId", "date", "clientName", "productId", "quantity", "status"]
+    },
+    "Client": {
+      "title": "Cliente",
+      "description": "Cadastro de clientes por loja.",
+      "type": "object",
+      "properties": {
+        "storeId": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["PF", "PJ"] },
+        "document": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "observations": { "type": "string" },
+        "totalSpent": { "type": "number" },
+        "lastPurchase": { "type": "string", "format": "date-time" },
+        "quoteCount": { "type": "number" }
+      },
+      "required": ["storeId", "name", "type", "document", "phone"]
+    },
+    "User": {
+      "title": "Usuário",
+      "description": "Cadastro de usuários do sistema.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["ADMIN", "GERENTE", "OPERADOR"] },
+        "storeIds": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["pendente", "aprovado", "bloqueado"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "role", "status", "createdAt"]
+    },
+    "Supplier": {
+      "title": "Fornecedor",
+      "description": "Cadastro de fornecedores por loja.",
+      "type": "object",
+      "properties": {
+        "storeId": { "type": "string" },
+        "name": { "type": "string" },
+        "contactName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "website": { "type": "string" },
+        "address": { "type": "string" },
+        "observations": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["storeId", "name", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/stores/{storeId}": { "schema": "Store", "description": "Coleção de lojas" },
+    "/costBases/{costBaseId}": { "schema": "CostBase", "description": "Configurações de custo por loja" },
+    "/materials/{materialId}": { "schema": "Material", "description": "Coleção de materiais" },
+    "/products/{productId}": { "schema": "Product", "description": "Coleção de produtos" },
+    "/quotes/{quoteId}": { "schema": "Quote", "description": "Coleção de orçamentos" },
+    "/clients/{clientId}": { "schema": "Client", "description": "Coleção de clientes" },
+    "/users/{userId}": { "schema": "User", "description": "Coleção de usuários" },
+    "/suppliers/{supplierId}": { "schema": "Supplier", "description": "Coleção de fornecedores" }
+  }
+}

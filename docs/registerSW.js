@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/SaaS-A-Caverna/sw.js', { scope: '/SaaS-A-Caverna/' })})}

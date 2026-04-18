@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function userExists() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isApproved() {
+      return userExists() &&
+        userDoc().data.status == 'aprovado';
+    }
+
+    function isAdmin() {
+      return isApproved() &&
+        userDoc().data.role == 'ADMIN';
+    }
+
+    function isGerente() {
+      return isApproved() &&
+        userDoc().data.role == 'GERENTE';
+    }
+
+    function hasStoreAccess(storeId) {
+      return isAdmin() ||
+        (isApproved() && userDoc().data.storeIds.hasAny([storeId]));
+    }
+
+    match /users/{userId} {
+      allow get: if isAuthenticated() && request.auth.uid == userId || isAdmin();
+
+      allow list: if isAdmin();
+
+      allow create: if isAuthenticated() && request.auth.uid == userId || isAdmin();
+
+      allow update: if
+        isAdmin() ||
+        (
+          isGerente() &&
+          resource.data.role != 'ADMIN' &&
+          request.resource.data.role != 'ADMIN'
+        ) ||
+        (
+          isAuthenticated() &&
+          request.auth.uid == userId &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone'])
+        );
+
+      allow delete: if isAdmin() || (isGerente() && resource.data.role != 'ADMIN');
+    }
+
+    match /stores/{storeId} {
+      allow get: if hasStoreAccess(storeId);
+      allow list: if isAdmin() || isGerente();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (isGerente() && hasStoreAccess(storeId));
+      allow delete: if isAdmin();
+    }
+
+    match /costBases/{docId} {
+      allow read, write: if hasStoreAccess(
+        request.method == 'get' ? resource.data.storeId : request.resource.data.storeId
+      );
+    }
+
+    match /materials/{docId} {
+      allow read, write: if hasStoreAccess(
+        request.method == 'get' ? resource.data.storeId : request.resource.data.storeId
+      );
+    }
+
+    match /products/{docId} {
+      allow read, write: if hasStoreAccess(
+        request.method == 'get' ? resource.data.storeId : request.resource.data.storeId
+      );
+    }
+
+    match /quotes/{docId} {
+      allow read, write: if hasStoreAccess(
+        request.method == 'get' ? resource.data.storeId : request.resource.data.storeId
+      );
+    }
+
+    match /clients/{docId} {
+      allow read, write: if hasStoreAccess(
+        request.method == 'get' ? resource.data.storeId : request.resource.data.storeId
+      );
+    }
+
+    match /suppliers/{docId} {
+      allow read, write: if hasStoreAccess(
+        request.method == 'get' ? resource.data.storeId : request.resource.data.storeId
+      );
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
