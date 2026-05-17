@@ -13,6 +13,9 @@ export interface Store {
   primaryColor?: string;
   secondaryColor?: string;
   observations?: string;
+  costPrice?: number
+  salePrice?: number
+  profitMargin?: number
 }
 
 export interface CostBase {
